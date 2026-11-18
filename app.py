@@ -5,122 +5,101 @@ from nicegui import ui
 
 
 ELEMENT_COUNT = 20
-PALETTE = [
-    '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899',
-    '#f43f5e', '#f97316', '#f59e0b', '#eab308', '#84cc16',
-    '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9',
-    '#3b82f6', '#4f46e5', '#7c3aed', '#c026d3', '#db2777',
-]
+PALETTE = ['#171717', '#2d2d2d', '#444444', '#5b5b5b', '#727272']
 values = [random.randint(15, 100) for _ in range(ELEMENT_COUNT)]
 labels = [f'Elemento {index:02d}' for index in range(1, ELEMENT_COUNT + 1)]
 short_labels = [f'{index:02d}' for index in range(1, ELEMENT_COUNT + 1)]
 
 
-def chart_data() -> list[dict[str, int | str]]:
-    return [
-        {'name': label, 'value': value}
-        for label, value in zip(labels, values)
-    ]
-
-
-def bar_options() -> dict:
+def radar_options() -> dict:
     return {
-        'tooltip': {'trigger': 'axis', 'axisPointer': {'type': 'shadow'}},
-        'grid': {'left': 42, 'right': 20, 'top': 28, 'bottom': 52},
-        'xAxis': {
-            'type': 'category',
-            'data': short_labels,
-            'axisLabel': {'color': '#64748b', 'interval': 0},
-            'axisLine': {'lineStyle': {'color': '#e2e8f0'}},
-            'axisTick': {'show': False},
-        },
-        'yAxis': {
-            'type': 'value',
-            'axisLabel': {'color': '#64748b'},
-            'splitLine': {'lineStyle': {'color': '#f1f5f9'}},
+        'tooltip': {'trigger': 'item'},
+        'radar': {
+            'indicator': [{'name': label, 'max': 100} for label in short_labels],
+            'radius': '68%',
+            'axisName': {'color': '#d4d4d4', 'fontSize': 10},
+            'axisLine': {'lineStyle': {'color': 'rgba(255, 255, 255, .22)'}},
+            'splitLine': {'lineStyle': {'color': 'rgba(255, 255, 255, .18)'}},
+            'splitArea': {'areaStyle': {'color': ['rgba(255, 255, 255, .025)', 'rgba(255, 255, 255, .06)']}},
         },
         'series': [{
-            'name': 'Valor',
-            'type': 'bar',
-            'data': [
-                {'value': value, 'itemStyle': {'color': PALETTE[index]}}
-                for index, value in enumerate(values)
-            ],
-            'barMaxWidth': 28,
-            'itemStyle': {'borderRadius': [6, 6, 0, 0]},
-            'emphasis': {'focus': 'series'},
+            'name': 'Valores',
+            'type': 'radar',
+            'data': [{
+                'name': 'Conjunto actual',
+                'value': values,
+                'areaStyle': {'color': 'rgba(255, 255, 255, .16)'},
+                'lineStyle': {'color': '#f5f5f5', 'width': 2},
+                'itemStyle': {'color': '#a3a3a3'},
+            }],
         }],
     }
 
 
-def pie_options() -> dict:
+def treemap_options() -> dict:
+    groups = [
+        {
+            'name': f'Grupo {chr(65 + group_index)}',
+            'children': [
+                {'name': labels[index], 'value': values[index]}
+                for index in range(group_index * 5, group_index * 5 + 5)
+            ],
+        }
+        for group_index in range(4)
+    ]
     return {
         'tooltip': {
-            'trigger': 'item',
-            'formatter': '{b}<br/>{c} unidades ({d}%)',
-        },
-        'legend': {
-            'show': False,
+            'formatter': '{b}: {c} unidades',
         },
         'series': [{
-            'name': 'Distribución',
-            'type': 'pie',
-            'radius': ['42%', '72%'],
-            'center': ['50%', '50%'],
-            'avoidLabelOverlap': True,
-            'itemStyle': {
-                'borderColor': '#ffffff',
-                'borderWidth': 2,
-                'borderRadius': 5,
-            },
-            'label': {'show': False},
-            'emphasis': {
-                'scale': True,
-                'label': {
-                    'show': True,
-                    'fontSize': 13,
-                    'fontWeight': 'bold',
-                    'formatter': '{b}\\n{d}%',
-                },
-            },
-            'data': [
+            'name': 'Elementos',
+            'type': 'treemap',
+            'data': groups,
+            'roam': False,
+            'breadcrumb': {'show': False},
+            'visibleMin': 8,
+            'label': {'show': True, 'color': '#f8fafc', 'fontSize': 11, 'formatter': '{b}'},
+            'upperLabel': {'show': True, 'height': 24, 'color': '#e2e8f0', 'fontWeight': 'bold'},
+            'itemStyle': {'borderColor': '#171717', 'borderWidth': 3, 'gapWidth': 3},
+            'levels': [
+                {},
                 {
-                    **item,
-                    'itemStyle': {'color': PALETTE[index]},
-                }
-                for index, item in enumerate(chart_data())
+                    'color': PALETTE,
+                    'colorSaturation': [0.35, 0.65],
+                    'itemStyle': {'borderColor': '#171717', 'borderWidth': 3, 'gapWidth': 3},
+                },
             ],
         }],
     }
 
 
-def line_options() -> dict:
+def scatter_options() -> dict:
     return {
         'tooltip': {'trigger': 'axis'},
-        'grid': {'left': 42, 'right': 20, 'top': 28, 'bottom': 42},
+        'grid': {'left': 48, 'right': 22, 'top': 28, 'bottom': 42},
         'xAxis': {
-            'type': 'category',
-            'boundaryGap': False,
-            'data': short_labels,
-            'axisLabel': {'color': '#64748b', 'interval': 1},
-            'axisLine': {'lineStyle': {'color': '#e2e8f0'}},
-            'axisTick': {'show': False},
+            'type': 'value',
+            'name': 'Elemento',
+            'nameTextStyle': {'color': '#a3a3a3'},
+            'axisLabel': {'color': '#a3a3a3'},
+            'axisLine': {'lineStyle': {'color': '#737373'}},
+            'splitLine': {'show': False},
         },
         'yAxis': {
             'type': 'value',
-            'axisLabel': {'color': '#64748b'},
-            'splitLine': {'lineStyle': {'color': '#f1f5f9'}},
+            'name': 'Valor',
+            'nameTextStyle': {'color': '#a3a3a3'},
+            'axisLabel': {'color': '#a3a3a3'},
+            'axisLine': {'show': False},
+            'splitLine': {'lineStyle': {'color': 'rgba(255, 255, 255, .13)'}},
         },
         'series': [{
             'name': 'Valor',
-            'type': 'line',
-            'data': values,
-            'smooth': True,
-            'symbol': 'circle',
-            'symbolSize': 7,
-            'lineStyle': {'width': 3, 'color': '#6366f1'},
-            'itemStyle': {'color': '#6366f1', 'borderColor': '#ffffff', 'borderWidth': 2},
-            'areaStyle': {'color': 'rgba(99, 102, 241, 0.12)'},
+            'type': 'scatter',
+            'data': [[index + 1, value] for index, value in enumerate(values)],
+            'symbolSize': 13,
+            'itemStyle': {'color': '#e5e5e5', 'borderColor': '#525252', 'borderWidth': 1},
+            'emphasis': {'scale': 1.5},
         }],
     }
 
@@ -129,31 +108,34 @@ ui.add_head_html('''
 <style>
     body {
         margin: 0;
-        background: #f4f6fb;
-        color: #172033;
+        background:
+            radial-gradient(ellipse at 12% 0%, rgba(14, 116, 144, .22), transparent 38%),
+            radial-gradient(ellipse at 90% 15%, rgba(124, 58, 237, .16), transparent 34%),
+            #0b1220;
+        color: #e2e8f0;
         font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
     .dashboard { max-width: 1440px; margin: 0 auto; padding: 34px 32px 48px; }
     .topbar { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
-    .eyebrow { color: #6366f1; font-size: 12px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
-    .page-title { color: #172033; font-size: 30px; font-weight: 750; letter-spacing: -.04em; line-height: 1.15; }
-    .page-subtitle { color: #748097; font-size: 14px; margin-top: 6px; }
-    .refresh-button { border-radius: 10px; font-weight: 650; padding: 9px 16px; }
+    .eyebrow { color: #5eead4; font-size: 12px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    .page-title { color: #f1f5f9; font-size: 30px; font-weight: 750; letter-spacing: -.04em; line-height: 1.15; }
+    .page-subtitle { color: #94a3b8; font-size: 14px; margin-top: 6px; }
+    .refresh-button { border-radius: 10px; font-weight: 650; padding: 9px 16px; background: #0f766e !important; }
     .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
     .metric-card, .chart-card {
-        background: #fff;
-        border: 1px solid #e8ebf2;
+        background: rgba(17, 28, 47, .88);
+        border: 1px solid rgba(148, 163, 184, .14);
         border-radius: 16px;
-        box-shadow: 0 5px 18px rgba(31, 41, 65, .035);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, .14);
     }
     .metric-card { padding: 19px 21px; min-height: 94px; }
-    .metric-label { color: #778198; font-size: 12px; font-weight: 600; }
-    .metric-value { color: #202a40; font-size: 25px; font-weight: 740; margin-top: 7px; }
+    .metric-label { color: #94a3b8; font-size: 12px; font-weight: 600; }
+    .metric-value { color: #f1f5f9; font-size: 25px; font-weight: 740; margin-top: 7px; }
     .charts-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
     .chart-card { min-width: 0; padding: 21px 22px 14px; }
     .chart-card--wide { grid-column: 1 / -1; }
-    .chart-title { color: #202a40; font-size: 16px; font-weight: 700; }
-    .chart-caption { color: #8a93a6; font-size: 12px; margin-top: 4px; }
+    .chart-title { color: #e2e8f0; font-size: 16px; font-weight: 700; }
+    .chart-caption { color: #94a3b8; font-size: 12px; margin-top: 4px; }
     .chart-card .q-card, .chart-card .nicegui-chart { width: 100%; }
     @media (max-width: 760px) {
         .dashboard { padding: 24px 16px 36px; }
@@ -167,7 +149,7 @@ ui.add_head_html('''
 </style>
 ''')
 
-ui.label('Despliegue de datos').classes('eyebrow')
+ui.label('Esta app tiene cambios').classes('eyebrow')
 
 @ui.refreshable
 def dashboard() -> None:
@@ -179,12 +161,12 @@ def dashboard() -> None:
             with ui.column().classes('gap-0'):
                 ui.label('PANEL DE DATOS').classes('eyebrow')
                 ui.label('Explorador de valores').classes('page-title')
-                ui.label('Una vista rápida de 20 elementos generados al azar.').classes('page-subtitle')
+                ui.label('Una vista nocturna e interactiva de 20 elementos generados al azar.').classes('page-subtitle')
             ui.button(
-                'Generar nuevos datos',
+                'Nuevos datos',
                 icon='autorenew',
                 on_click=regenerate_data,
-            ).props('color=primary unelevated no-caps').classes('refresh-button')
+            ).props('unelevated no-caps').classes('refresh-button')
 
         with ui.element('section').classes('metrics'):
             metric('Elementos', f'{ELEMENT_COUNT}', 'dataset')
@@ -194,19 +176,19 @@ def dashboard() -> None:
 
         with ui.element('section').classes('charts-grid'):
             with ui.element('article').classes('chart-card chart-card--wide'):
-                ui.label('Valores por elemento').classes('chart-title')
-                ui.label('Comparación individual · pasa el cursor para ver el detalle').classes('chart-caption')
-                ui.echart(bar_options()).style('width: 100%; height: 330px;')
+                ui.label('Perfil de valores').classes('chart-title')
+                ui.label('Gráfico radar · compara el conjunto completo de un vistazo').classes('chart-caption')
+                ui.echart(radar_options()).style('width: 100%; height: 370px;')
 
             with ui.element('article').classes('chart-card'):
-                ui.label('Distribución del total').classes('chart-title')
-                ui.label('Participación de cada elemento en el conjunto').classes('chart-caption')
-                ui.echart(pie_options()).style('width: 100%; height: 310px;')
+                ui.label('Composición por grupos').classes('chart-title')
+                ui.label('Treemap · el área de cada bloque representa su valor').classes('chart-caption')
+                ui.echart(treemap_options()).style('width: 100%; height: 310px;')
 
             with ui.element('article').classes('chart-card'):
-                ui.label('Tendencia entre elementos').classes('chart-title')
-                ui.label('Recorrido de los valores en orden').classes('chart-caption')
-                ui.echart(line_options()).style('width: 100%; height: 310px;')
+                ui.label('Relación elemento / valor').classes('chart-title')
+                ui.label('Dispersión · cada punto representa un elemento').classes('chart-caption')
+                ui.echart(scatter_options()).style('width: 100%; height: 310px;')
 
 
 def metric(title: str, value: str, icon: str) -> None:
@@ -215,7 +197,7 @@ def metric(title: str, value: str, icon: str) -> None:
             with ui.column().classes('gap-0'):
                 ui.label(title).classes('metric-label')
                 ui.label(value).classes('metric-value')
-            ui.icon(icon).classes('text-indigo-500 text-xl')
+            ui.icon(icon).classes('text-emerald-300 text-xl')
 
 
 def regenerate_data() -> None:
